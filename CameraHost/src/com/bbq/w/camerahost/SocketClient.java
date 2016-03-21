@@ -24,7 +24,7 @@ public class SocketClient {
 		this.mHostAddress = hostAddress;
 	}
 
-	public void buildConnect() {
+	public boolean buildConnect() {
 		boolean shouldAbort = false;
 		Socket socket = null;
 		try {
@@ -56,6 +56,7 @@ public class SocketClient {
 				mSocket = null;
 			}
 		}
+		return !shouldAbort;
 	}
 
 	public void flushDataByte(byte[] data) {
