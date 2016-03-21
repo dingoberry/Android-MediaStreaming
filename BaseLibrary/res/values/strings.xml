@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="ip_txt">IP:</string>
+    <string name="port_txt">Port:</string>
+    <string name="connect_txt">Connect</string>
+
+</resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="90dp"
+            android:gravity="right|center_vertical"
+            android:text="@string/ip_txt" />
+
+        <EditText
+            android:id="@+id/base_ip"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:inputType="textUri"
+            android:textColor="@android:color/black" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="90dp"
+            android:gravity="right|center_vertical"
+            android:text="@string/port_txt" />
+
+        <EditText
+            android:id="@+id/base_port"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:inputType="number"
+            android:textColor="@android:color/black" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/base_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/connect_txt" />
+
+</LinearLayout>
