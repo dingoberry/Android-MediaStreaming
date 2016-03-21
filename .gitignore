@@ -2,6 +2,7 @@ bin/
 gen/
 .classpath
 .project
+.metadata/
 local.properties
 .ant-targets-build.xml
 .settings/
