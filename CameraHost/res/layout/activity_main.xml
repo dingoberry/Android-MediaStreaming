@@ -8,9 +8,25 @@
         android:id="@+id/main_connect"
         layout="@layout/connect_layout" />
 
-    <SurfaceView
-        android:id="@+id/main_sv"
+    <FrameLayout
+        android:id="@+id/main_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:visibility="gone" >
+
+        <SurfaceView
+            android:id="@+id/main_sv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/main_switcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/swicher" />
+    </FrameLayout>
+
 </FrameLayout>

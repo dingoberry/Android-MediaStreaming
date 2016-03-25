@@ -3,6 +3,7 @@ gen/
 .classpath
 .project
 .metadata/
+appcompat_v7/
 local.properties
 .ant-targets-build.xml
 .settings/
