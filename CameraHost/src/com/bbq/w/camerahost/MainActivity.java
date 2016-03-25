@@ -4,18 +4,16 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
+import com.bbq.w.library.CameraUtils;
 import com.bbq.w.library.LogLib;
 import com.bbq.w.library.SpUtils;
 import com.bbq.w.library.ThreadUtils;
@@ -27,16 +25,23 @@ public class MainActivity extends Activity implements OnClickListener,
 	private final static String IP_RESERVER = "ip_reserver";
 	private final static String PORT_RESERVER = "port_reserver";
 	private final static int INVALID_VALUE = -1;
+	private final static int CAMERA_HEIGHT = 600;
+	private final static int CAMERA_WIDTH = 800;
 
 	private View mConnect;
 	private SocketClient mCilent;
 
 	private EditText mIp;
 	private EditText mPort;
+	private View mContainer;
+	private View mSwitcher;
 	private SurfaceView mSv;
 
 	private Camera mCamera;
 	private SurfaceHolder mHolder;
+
+	private int[] mCameraIds;
+	private int mIdIndex;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,9 @@ public class MainActivity extends Activity implements OnClickListener,
 		mIp = (EditText) findViewById(R.id.base_ip);
 		mPort = (EditText) findViewById(R.id.base_port);
 		mSv = (SurfaceView) findViewById(R.id.main_sv);
+		mContainer = findViewById(R.id.main_holder);
+		mSwitcher = findViewById(R.id.main_switcher);
+		mSwitcher.setOnClickListener(this);
 		mHolder = mSv.getHolder();
 
 		String ip = SpUtils.getString(this, IP_RESERVER);
@@ -62,10 +70,39 @@ public class MainActivity extends Activity implements OnClickListener,
 	}
 
 	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		mCilent.disconnect();
+	}
+
+	@Override
 	public void onClick(View v) {
 		if (v == mConnect) {
 			openConnection();
+		} else if (v == mSwitcher) {
+			switchCamera();
 		}
+	}
+
+	private void switchCamera() {
+		Camera camera = mCamera;
+		if (camera != null) {
+			camera.setPreviewCallback(null);
+			camera.stopPreview();
+			camera.release();
+			mCamera = null;
+			LogLib.d("switching, release camera.");
+		}
+
+		ThreadUtils.runAloneThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mIdIndex = ((mIdIndex + 1) % mCameraIds.length);
+				openCamera();
+			}
+		});
 	}
 
 	private void openConnection() {
@@ -81,6 +118,7 @@ public class MainActivity extends Activity implements OnClickListener,
 					SpUtils.saveString(MainActivity.this, IP_RESERVER, ip);
 					SpUtils.saveInt(MainActivity.this, PORT_RESERVER, port);
 
+					LogLib.d("Connect state: " + state);
 					if (state == true) {
 						mIp.post(MainActivity.this);
 					}
@@ -93,38 +131,18 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	private void openCamera() {
 		Camera camera = mCamera;
+		int cameraId = mCameraIds[mIdIndex];
 		if (camera == null) {
-			camera = Camera.open();
+			LogLib.d("open new camera");
+			camera = Camera.open(cameraId);
 			mCamera = camera;
 		}
 
 		try {
-			int degrees;
-			switch (getWindowManager().getDefaultDisplay().getOrientation()) {
-			case Surface.ROTATION_90:
-				degrees = 90;
-				break;
-
-			case Surface.ROTATION_180:
-				degrees = 180;
-				break;
-
-			case Surface.ROTATION_270:
-				degrees = 270;
-				break;
-
-			default:
-				degrees = 0;
-				break;
-			}
-			CameraInfo cameraInfo = new CameraInfo();
-			Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, cameraInfo);
-			degrees = (cameraInfo.orientation - degrees + 360) % 360;
-			camera.setDisplayOrientation(degrees);
+			CameraUtils.fixCameraDegree(camera, cameraId, this);
+			CameraUtils.setPreviewSize(camera, CAMERA_WIDTH, CAMERA_HEIGHT);
 			camera.setPreviewCallback(this);
-			Parameters parameters = camera.getParameters();
 			camera.setPreviewDisplay(mHolder);
-			LogLib.d("parm=" + parameters.getSupportedPreviewFormats());
 			camera.startPreview();
 		} catch (IOException e) {
 			LogLib.w(e);
@@ -134,8 +152,15 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void run() {
-		mSv.setVisibility(View.VISIBLE);
+		mContainer.setVisibility(View.VISIBLE);
 		mConnect.setVisibility(View.GONE);
+		int[] cameraIds = CameraUtils.getCameraIds();
+		if (cameraIds == null || cameraIds.length == 0) {
+			LogLib.d("not suppored camera.");
+			return;
+		}
+		mCameraIds = cameraIds;
+		mIdIndex = 0;
 
 		ThreadUtils.runAloneThread(new Runnable() {
 			@Override
@@ -147,6 +172,6 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-
+		mCilent.flushDataByte(data);
 	}
 }
