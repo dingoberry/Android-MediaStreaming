@@ -95,7 +95,7 @@ public class AppServer implements Runnable {
 			int size = inputStream.readInt();
 			byte[] buffer = new byte[size];
 			int length;
-
+			System.out.println("size=" + size);
 			while((length = inputStream.read(buffer)) != -1) {
 				send(Arrays.copyOf(buffer, length));
 			}
@@ -105,6 +105,7 @@ public class AppServer implements Runnable {
 		} finally {
 			try {
 				hostClient.close();
+				mHostClient = null;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
