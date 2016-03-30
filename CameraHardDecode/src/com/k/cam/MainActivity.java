@@ -18,7 +18,8 @@ import com.bbq.w.library.LogLib;
 @SuppressWarnings("deprecation")
 public class MainActivity extends CameraActivity implements Renderer,
 		OnFrameAvailableListener {
-	
+
+	private final static int INVALID_VALUE = -1;
 	private final static int CAMERA_HEIGHT = 600;
 	private final static int CAMERA_WIDTH = 800;
 
@@ -68,12 +69,27 @@ public class MainActivity extends CameraActivity implements Renderer,
 		SurfaceTexture st = new SurfaceTexture(textureID);
 		st.setOnFrameAvailableListener(this);
 		mSt = st;
-		int[] ids = CameraUtils.getCameraIds();
-		if (ids.length > 0) {
-			LogLib.d("open cam with id=" + ids[0]);
+		int id = resolveCameraId();
+		if (id != INVALID_VALUE) {
+			LogLib.d("open cam with id=" + id);
 			mDrawer = new DirectDrawer(textureID);
-			openCam(ids[0], CAMERA_WIDTH, CAMERA_HEIGHT);
+			openCam(id, CAMERA_WIDTH, CAMERA_HEIGHT);
 		}
+	}
+
+	private int resolveCameraId() {
+		int cameraId = INVALID_VALUE;
+		for (int id : CameraUtils.getCameraIds()) {
+			if (INVALID_VALUE == cameraId) {
+				cameraId = id;
+			}
+
+			if (Configuration.CURRENT_CAMERA_ID == id) {
+				cameraId = id;
+				break;
+			}
+		}
+		return cameraId;
 	}
 
 	@Override
@@ -88,7 +104,7 @@ public class MainActivity extends CameraActivity implements Renderer,
 
 	@Override
 	public void onDrawFrame(GL10 gl10) {
-		LogLib.d("onDrawFrame");
+//		LogLib.d("onDrawFrame");
 		GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		mSt.updateTexImage();
@@ -99,12 +115,12 @@ public class MainActivity extends CameraActivity implements Renderer,
 
 	@Override
 	public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-		LogLib.d("onFrameAvailable");
+//		LogLib.d("onFrameAvailable");
 		mSv.requestRender();
 	}
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		LogLib.d("onPreviewFrame");
+//		LogLib.d("onPreviewFrame:" + data.length);
 	}
 }
