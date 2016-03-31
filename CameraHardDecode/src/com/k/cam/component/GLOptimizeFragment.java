@@ -1,4 +1,4 @@
-package com.k.cam;
+package com.k.cam.component;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -11,15 +11,20 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.bbq.w.library.CameraUtils;
 import com.bbq.w.library.LogLib;
+import com.k.cam.Configuration;
+import com.k.cam.DirectDrawer;
+import com.k.cam.R;
 
 @SuppressWarnings("deprecation")
-public class MainActivity extends CameraActivity implements Renderer,
+public class GLOptimizeFragment extends CameraFragment implements Renderer,
 		OnFrameAvailableListener {
 
-	private final static int INVALID_VALUE = -1;
 	private final static int CAMERA_HEIGHT = 600;
 	private final static int CAMERA_WIDTH = 800;
 
@@ -28,21 +33,21 @@ public class MainActivity extends CameraActivity implements Renderer,
 	private DirectDrawer mDrawer;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		LogLib.d("onCreate");
-		setContentView(R.layout.activity_main);
-		GLSurfaceView gv = (GLSurfaceView) findViewById(R.id.sv);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		LogLib.d("onCreateView");
+		View content = inflater.inflate(R.layout.gl_optimize_fragment,
+				container, false);
+		GLSurfaceView gv = (GLSurfaceView) content.findViewById(R.id.sv);
 		gv.setEGLContextClientVersion(2);
 		gv.setRenderer(this);
 		gv.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 		mSv = gv;
-
+		return content;
 	}
 
 	@Override
-	protected void onDestroy() {
-		LogLib.d("onDestroy");
+	public void onDestroy() {
 		releaseCam();
 		super.onDestroy();
 	}
@@ -76,22 +81,7 @@ public class MainActivity extends CameraActivity implements Renderer,
 			openCam(id, CAMERA_WIDTH, CAMERA_HEIGHT);
 		}
 	}
-
-	private int resolveCameraId() {
-		int cameraId = INVALID_VALUE;
-		for (int id : CameraUtils.getCameraIds()) {
-			if (INVALID_VALUE == cameraId) {
-				cameraId = id;
-			}
-
-			if (Configuration.CURRENT_CAMERA_ID == id) {
-				cameraId = id;
-				break;
-			}
-		}
-		return cameraId;
-	}
-
+	
 	@Override
 	public void onSurfaceChanged(GL10 gl10, int width, int height) {
 		LogLib.d("onSurfaceChanged");
@@ -104,7 +94,7 @@ public class MainActivity extends CameraActivity implements Renderer,
 
 	@Override
 	public void onDrawFrame(GL10 gl10) {
-//		LogLib.d("onDrawFrame");
+		// LogLib.d("onDrawFrame");
 		GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		mSt.updateTexImage();
@@ -115,12 +105,12 @@ public class MainActivity extends CameraActivity implements Renderer,
 
 	@Override
 	public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//		LogLib.d("onFrameAvailable");
+		// LogLib.d("onFrameAvailable");
 		mSv.requestRender();
 	}
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-//		LogLib.d("onPreviewFrame:" + data.length);
+		// LogLib.d("onPreviewFrame:" + data.length);
 	}
 }
