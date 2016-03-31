@@ -18,30 +18,49 @@ public abstract class CameraFragment extends Fragment implements
 		PreviewCallback {
 
 	protected final static int INVALID_VALUE = -1;
-	
+
 	private Camera mCam;
+	private FRAME_CALL_MODE mMode = FRAME_CALL_MODE.NONE;
 	private AtomicBoolean mIsPreviewing = new AtomicBoolean();
+
+	private int mWidth, mHeight;
+	private byte[] mBuffer;
 	
+	protected abstract void onFrameArrival(byte[] data, Camera camera);
+
+	@Override
+	public final void onPreviewFrame(byte[] data, Camera camera) {
+		onFrameArrival(data, camera);
+
+		if (mMode == FRAME_CALL_MODE.BUFFER) {
+			camera.addCallbackBuffer(mBuffer);
+		}
+	}
+
 	@Override
 	public void onStart() {
 		super.onStart();
-		LogLib.d("onStart");
+		LogLib.d("CameraFragment:onStart");
 		Camera cam = mCam;
 		if (mIsPreviewing.get() && cam != null) {
 			cam.startPreview();
 		}
 	}
-	
+
 	@Override
 	public void onStop() {
 		super.onStop();
-		LogLib.d("onStop");
+		LogLib.d("CameraFragment:onStop");
 		Camera cam = mCam;
 		if (mIsPreviewing.get() && cam != null) {
 			cam.stopPreview();
 		}
 	}
-	
+
+	protected void setFrameMode(FRAME_CALL_MODE mode) {
+		mMode = mode;
+	}
+
 	protected int resolveCameraId() {
 		int cameraId = INVALID_VALUE;
 		for (int id : CameraUtils.getCameraIds()) {
@@ -67,25 +86,41 @@ public abstract class CameraFragment extends Fragment implements
 		CameraUtils.fixCameraDegree(cam, id, getActivity());
 		CameraUtils.setPreviewSize(cam, width, height);
 		mCam = cam;
+		mWidth = width;
+		mHeight = height;
 	}
 
 	protected boolean isPreviewing() {
 		return mIsPreviewing.get();
 	}
-	
+
 	private void startPreview(Object observer) {
 		Camera cam = mCam;
 		if (cam == null) {
 			return;
 		}
-		cam.setPreviewCallback(this);
+
 		try {
-			cam.setPreviewCallback(this);
 			if (observer instanceof SurfaceTexture) {
-				cam.setPreviewTexture((SurfaceTexture)observer);
+				cam.setPreviewTexture((SurfaceTexture) observer);
 			} else {
 				cam.setPreviewDisplay((SurfaceHolder) observer);
 			}
+
+			switch (mMode) {
+			case BUFFER:
+				mBuffer = new byte[mWidth * mHeight * 3 / 2];
+				cam.addCallbackBuffer(mBuffer);
+				cam.setPreviewCallbackWithBuffer(this);
+				break;
+			case NORMAL:
+				cam.setPreviewCallback(this);
+				break;
+
+			default:
+				break;
+			}
+			
 			cam.startPreview();
 			mIsPreviewing.compareAndSet(false, true);
 			mCam = cam;
@@ -96,11 +131,11 @@ public abstract class CameraFragment extends Fragment implements
 	}
 
 	protected void startPreview(SurfaceTexture surfaceTexture) {
-		startPreview((Object)surfaceTexture);
+		startPreview((Object) surfaceTexture);
 	}
 
 	protected void startPreview(SurfaceHolder surfaceHolder) {
-		startPreview((Object)surfaceHolder);
+		startPreview((Object) surfaceHolder);
 	}
 
 	protected void releaseCam() {
@@ -113,5 +148,9 @@ public abstract class CameraFragment extends Fragment implements
 		cam.stopPreview();
 		mCam = null;
 		mIsPreviewing.set(false);
+	}
+
+	protected enum FRAME_CALL_MODE {
+		NORMAL, BUFFER, NONE
 	}
 }

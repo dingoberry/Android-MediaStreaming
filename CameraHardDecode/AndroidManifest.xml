@@ -33,6 +33,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="com.k.cam.component.DataProcessService"
+            android:process=":back_data" >
+        </service>
     </application>
 
 </manifest>

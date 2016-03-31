@@ -1,5 +1,6 @@
 package com.k.cam.component;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -34,7 +35,14 @@ public class MainActivity extends FragmentActivity {
 
 		if (fragment != null) {
 			loadFragment(fragment);
+			startService(new Intent(this, DataProcessService.class));
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		stopService(new Intent(this, DataProcessService.class));
 	}
 
 	private void loadFragment(Fragment fragment) {

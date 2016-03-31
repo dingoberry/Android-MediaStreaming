@@ -34,7 +34,7 @@ public class NormalSurfaceFragment extends CameraFragment implements Callback {
 	}
 
 	@Override
-	public void onPreviewFrame(byte[] data, Camera camera) {
+	public void onFrameArrival(byte[] data, Camera camera) {
 		
 	}
 

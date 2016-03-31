@@ -6,19 +6,21 @@ import javax.microedition.khronos.opengles.GL10;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bbq.w.library.CameraUtils;
 import com.bbq.w.library.LogLib;
-import com.k.cam.Configuration;
 import com.k.cam.DirectDrawer;
+import com.k.cam.MediaHardEncoder;
 import com.k.cam.R;
 
 @SuppressWarnings("deprecation")
@@ -31,6 +33,14 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 	private GLSurfaceView mSv;
 	private SurfaceTexture mSt;
 	private DirectDrawer mDrawer;
+	
+	private MediaHardEncoder mEncoder;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setFrameMode(FRAME_CALL_MODE.BUFFER);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,6 +59,11 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 	@Override
 	public void onDestroy() {
 		releaseCam();
+		
+		MediaHardEncoder encoder = mEncoder;
+		if (encoder != null) {
+			encoder.stopEncode();
+		}
 		super.onDestroy();
 	}
 
@@ -77,11 +92,19 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 		int id = resolveCameraId();
 		if (id != INVALID_VALUE) {
 			LogLib.d("open cam with id=" + id);
-			mDrawer = new DirectDrawer(textureID);
+			mDrawer = new DirectDrawer(textureID,
+					id == CameraInfo.CAMERA_FACING_FRONT);
 			openCam(id, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+			if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+				MediaHardEncoder encoder = new MediaHardEncoder();
+				if (encoder.build(CAMERA_WIDTH, CAMERA_HEIGHT)) {
+					mEncoder = encoder;
+				}
+			}
 		}
 	}
-	
+
 	@Override
 	public void onSurfaceChanged(GL10 gl10, int width, int height) {
 		LogLib.d("onSurfaceChanged");
@@ -110,7 +133,9 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 	}
 
 	@Override
-	public void onPreviewFrame(byte[] data, Camera camera) {
+	public void onFrameArrival(byte[] data, Camera camera) {
 		// LogLib.d("onPreviewFrame:" + data.length);
+		if (mEncoder != null)
+			mEncoder.feedData(data);
 	}
 }
