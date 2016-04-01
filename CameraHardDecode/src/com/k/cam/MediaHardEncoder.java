@@ -14,7 +14,7 @@ import com.bbq.w.library.LogLib;
 
 @TargetApi(16)
 @SuppressWarnings("deprecation")
-public class MediaHardEncoder {
+public class MediaHardEncoder implements MediaHardCore{
 
 	private final static String ENCODER_TYPE = "Video/AVC";
 	private MediaCodec mCodec;
@@ -103,7 +103,7 @@ public class MediaHardEncoder {
 		}
 		
 		ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
-		int inputIndex = mediaCodec.dequeueInputBuffer(-1);
+		int inputIndex = mediaCodec.dequeueInputBuffer(TIMEOUT_USEC);
 		LogLib.d("MediaDataHardProc:inputIndex=" + inputIndex);
 		LogLib.d("MediaDataHardProc:inputBuffers=" + inputBuffers.length);
 		if (inputIndex >= 0) {

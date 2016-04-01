@@ -1,5 +1,5 @@
 package com.k.cam;
 
-public class MediaHardDecoder {
+public class MediaHardDecoder implements MediaHardCore{
 
 }
