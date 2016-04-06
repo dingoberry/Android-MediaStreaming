@@ -14,6 +14,7 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,21 +22,25 @@ import android.view.ViewGroup;
 import com.bbq.w.library.LogLib;
 import com.k.cam.DirectDrawer;
 import com.k.cam.MediaHardEncoder;
+import com.k.cam.MediaHardEncoder.EncodeDataReceiver;
 import com.k.cam.R;
 
 @SuppressWarnings("deprecation")
 public class GLOptimizeFragment extends CameraFragment implements Renderer,
-		OnFrameAvailableListener {
+		OnFrameAvailableListener, EncodeDataReceiver {
 
-	private final static int CAMERA_HEIGHT = 600;
-	private final static int CAMERA_WIDTH = 800;
+	// private final static int CAMERA_HEIGHT = 600;
+	// private final static int CAMERA_WIDTH = 800;
+
+	private final static int CAMERA_HEIGHT = 720;
+	private final static int CAMERA_WIDTH = 1280;
 
 	private GLSurfaceView mSv;
 	private SurfaceTexture mSt;
 	private DirectDrawer mDrawer;
-	
+
 	private MediaHardEncoder mEncoder;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,7 +64,7 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 	@Override
 	public void onDestroy() {
 		releaseCam();
-		
+
 		MediaHardEncoder encoder = mEncoder;
 		if (encoder != null) {
 			encoder.stopEncode();
@@ -98,7 +103,8 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 
 			if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
 				MediaHardEncoder encoder = new MediaHardEncoder();
-				if (encoder.build(CAMERA_WIDTH, CAMERA_HEIGHT)) {
+				encoder.setEncodeDataReceiver(this);
+				if (encoder.startEncode(CAMERA_WIDTH, CAMERA_HEIGHT)) {
 					mEncoder = encoder;
 				}
 			}
@@ -134,8 +140,13 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 
 	@Override
 	public void onFrameArrival(byte[] data, Camera camera) {
-		// LogLib.d("onPreviewFrame:" + data.length);
-		if (mEncoder != null)
+		if (mEncoder != null) {
 			mEncoder.feedData(data);
+		}
+	}
+
+	@Override
+	public void receiveData(byte[] data) {
+		Log.d("ccmm", "receiveData:" + data.length);
 	}
 }
