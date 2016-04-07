@@ -1,6 +1,7 @@
 package com.k.cam.component;
 
 import com.bbq.w.library.LogLib;
+import com.k.cam.Configuration;
 
 import android.app.IntentService;
 import android.app.Service;
@@ -10,21 +11,28 @@ import android.os.Process;
 
 public class DataProcessService extends Service {
 
+	private final static String TAG = "DataProcessService";
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		LogLib.d("DataProcessService:onCreate");
+		if (DEBUG) {
+			LogLib.d(TAG, "DataProcessService:onCreate");
+		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		LogLib.d("DataProcessService:onDestroy");
+		if (DEBUG) {
+			LogLib.d(TAG, "DataProcessService:onDestroy");
+		}
 
 		Process.killProcess(Process.myPid());
 	}

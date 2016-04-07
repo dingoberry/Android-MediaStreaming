@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bbq.w.library.LogLib;
+import com.k.cam.Configuration;
 import com.k.cam.DirectDrawer;
 import com.k.cam.MediaHardEncoder;
 import com.k.cam.MediaHardEncoder.EncodeDataReceiver;
@@ -28,6 +29,9 @@ import com.k.cam.R;
 @SuppressWarnings("deprecation")
 public class GLOptimizeFragment extends CameraFragment implements Renderer,
 		OnFrameAvailableListener, EncodeDataReceiver {
+
+	private final static String TAG = "GLOptimizeFragment";
+	private static final boolean DEBUG = Configuration.DEBUG;
 
 	// private final static int CAMERA_HEIGHT = 600;
 	// private final static int CAMERA_WIDTH = 800;
@@ -50,7 +54,9 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		LogLib.d("onCreateView");
+		if (DEBUG) {
+			LogLib.d(TAG, "onCreateView");
+		}
 		View content = inflater.inflate(R.layout.gl_optimize_fragment,
 				container, false);
 		GLSurfaceView gv = (GLSurfaceView) content.findViewById(R.id.sv);
@@ -89,14 +95,18 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 
 	@Override
 	public void onSurfaceCreated(GL10 gl10, EGLConfig config) {
-		LogLib.d("onSurfaceCreated");
+		if (DEBUG) {
+			LogLib.d(TAG, "onSurfaceCreated");
+		}
 		int textureID = createTextureID();
 		SurfaceTexture st = new SurfaceTexture(textureID);
 		st.setOnFrameAvailableListener(this);
 		mSt = st;
 		int id = resolveCameraId();
 		if (id != INVALID_VALUE) {
-			LogLib.d("open cam with id=" + id);
+			if (DEBUG) {
+				LogLib.d(TAG, "open cam with id=" + id);
+			}
 			mDrawer = new DirectDrawer(textureID,
 					id == CameraInfo.CAMERA_FACING_FRONT);
 			openCam(id, CAMERA_WIDTH, CAMERA_HEIGHT);
@@ -113,7 +123,9 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 
 	@Override
 	public void onSurfaceChanged(GL10 gl10, int width, int height) {
-		LogLib.d("onSurfaceChanged");
+		if (DEBUG) {
+			LogLib.d(TAG, "onSurfaceChanged");
+		}
 		GLES20.glViewport(0, 0, width, height);
 		if (isPreviewing()) {
 			return;

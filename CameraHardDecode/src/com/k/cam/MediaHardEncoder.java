@@ -12,11 +12,15 @@ import android.media.MediaCodecList;
 import android.media.MediaFormat;
 
 import com.bbq.w.library.LogLib;
+import com.bbq.w.library.ThreadUtils;
 
 @TargetApi(16)
 @SuppressWarnings("deprecation")
 public class MediaHardEncoder implements MediaHardCore, Runnable {
 
+	private final static String TAG = "MediaHardEncoder";
+	private static final boolean DEBUG = Configuration.DEBUG;
+	
 	private final static String ENCODER_TYPE = "Video/AVC";
 
 	private MediaCodec mCodec;
@@ -37,7 +41,9 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 			}
 
 			for (String type : codecInfo.getSupportedTypes()) {
-				LogLib.d("i=" + i + "; type:" + type);
+				if (DEBUG) {
+					LogLib.d(TAG, "i=" + i + "; type:" + type);
+				}
 				if (encodeType.equalsIgnoreCase(type)) {
 					found = true;
 					encodeType = type;
@@ -49,8 +55,9 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 		if (!found) {
 			return null;
 		}
-
-		LogLib.d("codecInfo:" + codecInfo.getName());
+		if (DEBUG) {
+			LogLib.d(TAG, "codecInfo:" + codecInfo.getName());
+		}
 		int[] colorFormats = codecInfo.getCapabilitiesForType(encodeType).colorFormats;
 
 		int colorFormat = Integer.MAX_VALUE;
@@ -84,8 +91,9 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 		if (!mIsEncoding.compareAndSet(false, true)) {
 			return false;
 		}
-
-		LogLib.d("MediaDataHardProc:build");
+		if (DEBUG) {
+			LogLib.d(TAG, "MediaDataHardProc:build");
+		}
 		boolean result;
 
 		try {
@@ -100,11 +108,12 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 			mediaCodec.start();
 			mCodec = mediaCodec;
-
-			new Thread(this).start();
+			ThreadUtils.runAloneThread(this);
 			result = true;
 		} catch (IOException e) {
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			mIsEncoding.set(false);
 			result = false;
 		}
@@ -123,8 +132,11 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 		ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
 		int inputIndex = mediaCodec.dequeueInputBuffer(TIMEOUT_USEC);
-		LogLib.d("MediaDataHardProc:inputIndex=" + inputIndex);
-		LogLib.d("MediaDataHardProc:inputBuffers=" + inputBuffers.length);
+		if (DEBUG) {
+			LogLib.d(TAG, "MediaDataHardProc:inputIndex=" + inputIndex);
+			LogLib.d(TAG, "MediaDataHardProc:inputBuffers="
+					+ inputBuffers.length);
+		}
 		if (inputIndex >= 0) {
 			ByteBuffer inBuffer = inputBuffers[inputIndex];
 			inBuffer.clear();
@@ -136,7 +148,9 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 	}
 
 	public void stopEncode() {
-		LogLib.d("MediaDataHardProc:stopEncode");
+		if (DEBUG) {
+			LogLib.d(TAG, "MediaDataHardProc:stopEncode");
+		}
 
 		mIsEncoding.set(false);
 		MediaCodec mediaCodec = mCodec;
@@ -158,9 +172,13 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 		byte[] data;
 		while (mIsEncoding.get()) {
-			LogLib.d("run:" + mIsEncoding.get());
+			if (DEBUG) {
+				LogLib.d(TAG, "run:" + mIsEncoding.get());
+			}
 			index = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
-			LogLib.d("output buffer:" + index);
+			if (DEBUG) {
+				LogLib.d(TAG, "output buffer:" + index);
+			}
 			if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
 				outputBuffers = mediaCodec.getOutputBuffers();
 			} else if (index >= 0) {

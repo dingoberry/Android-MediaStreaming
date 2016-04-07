@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SpUtils {
-	
+
+	private static final String TAG = "SpUtils";
+	private final static boolean DEBUG = LibConstants.DEBUG;
+
 	private static final String SP_NAME = SpUtils.class.getCanonicalName();
 	private static Method sApplyMethod;
 
@@ -29,9 +32,13 @@ public class SpUtils {
 				localMethod.invoke(editor, arrayOfObject);
 				return;
 			} catch (IllegalAccessException e) {
-				LogLib.e(e);
+				if (DEBUG) {
+					LogLib.e(TAG, e);
+				}
 			} catch (InvocationTargetException e) {
-				LogLib.e(e);
+				if (DEBUG) {
+					LogLib.e(TAG, e);
+				}
 			}
 		}
 
@@ -44,10 +51,10 @@ public class SpUtils {
 	}
 
 	public static String getString(Context cxt, String key) {
-		return cxt.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).getString(
-				key, null);
+		return cxt.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+				.getString(key, null);
 	}
-	
+
 	public static void saveInt(Context cxt, String key, int value) {
 		apply(cxt.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).edit()
 				.putInt(key, value));

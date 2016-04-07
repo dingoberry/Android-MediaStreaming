@@ -12,10 +12,15 @@ import com.k.cam.R;
 
 public class MainActivity extends FragmentActivity {
 
+	private final static String TAG = "CameraDecMain";
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		LogLib.d("onCreate");
+		if (DEBUG) {
+			LogLib.d(TAG, "onCreate");
+		}
 		setContentView(R.layout.activity_main);
 
 		Fragment fragment;

@@ -13,6 +13,9 @@ import android.view.WindowManager;
 @SuppressWarnings("deprecation")
 public class CameraUtils {
 
+	private final static String TAG = "CameraUtils";
+	private final static boolean DEBUG = LibConstants.DEBUG;
+
 	private static int getDisplayRotation(Context ctx) {
 		WindowManager wm = (WindowManager) ctx
 				.getSystemService(Context.WINDOW_SERVICE);
@@ -37,7 +40,9 @@ public class CameraUtils {
 			rotation = 0;
 			break;
 		}
-		LogLib.d("getDisplayRotation : " + rotation);
+		if (DEBUG) {
+			LogLib.d(TAG, "getDisplayRotation : " + rotation);
+		}
 		return rotation;
 	}
 
@@ -54,8 +59,10 @@ public class CameraUtils {
 		}
 		cam.setDisplayOrientation(result);
 
-		LogLib.d("fixCameraDegree : " + result + "; cameraInfo="
-				+ cameraInfo.orientation);
+		if (DEBUG) {
+			LogLib.d(TAG, "fixCameraDegree : " + result + "; cameraInfo="
+					+ cameraInfo.orientation);
+		}
 	}
 
 	public static void setPreviewSize(Camera cam, int width, int height) {
@@ -65,8 +72,10 @@ public class CameraUtils {
 		float ratio = (float) width / height;
 		boolean isCompared = false;
 		for (Size size : sizes) {
-			LogLib.d(size.width + ";" + size.height);
-			LogLib.d("refR = " + (float) size.width / size.height);
+			if (DEBUG) {
+				LogLib.d(TAG, size.width + ";" + size.height);
+				LogLib.d(TAG, "refR = " + (float) size.width / size.height);
+			}
 			if (ratio == (float) size.width / size.height) {
 				isCompared = true;
 				break;
@@ -77,7 +86,9 @@ public class CameraUtils {
 			parameters.setPreviewSize(width, height);
 			cam.setParameters(parameters);
 		}
-		LogLib.d("isCompared = " + isCompared + "; ratio=" + ratio);
+		if (DEBUG) {
+			LogLib.d(TAG, "isCompared = " + isCompared + "; ratio=" + ratio);
+		}
 	}
 
 	public static int[] getCameraIds() {

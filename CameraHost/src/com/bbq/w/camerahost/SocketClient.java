@@ -10,12 +10,14 @@ import com.bbq.w.library.LogLib;
 import com.bbq.w.library.MalProtocolException;
 import com.bbq.w.library.ProtocolLib;
 import com.bbq.w.library.ServerConstants;
-import com.bbq.w.library.ThreadUtils;
 
 public class SocketClient {
 
+	private final static String TAG = "SocketClient";
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	private final static int INVALID_VALUE = -1;
-	
+
 	private Socket mSocket;
 	private String mHostAddress;
 	private int mPort;
@@ -38,26 +40,32 @@ public class SocketClient {
 					ServerConstants.IDENTIFY_HOST);
 			mByteSize = INVALID_VALUE;
 			mSocket = socket;
-			LogLib.d("connect successfully.");
+			if (DEBUG) {
+				LogLib.d(TAG, "connect successfully.");
+			}
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			shouldAbort = true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			shouldAbort = true;
 		} catch (MalProtocolException e) {
-			// TODO Auto-generated catch block
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			shouldAbort = true;
 		} finally {
 			if (shouldAbort && socket != null) {
 				try {
 					socket.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					LogLib.w(e);
+					if (DEBUG) {
+						LogLib.w(TAG, e);
+					}
 				}
 				mSocket = null;
 			}
@@ -66,7 +74,9 @@ public class SocketClient {
 	}
 
 	public void disconnect() {
-		LogLib.d("disconnect.");
+		if (DEBUG) {
+			LogLib.d(TAG, "disconnect.");
+		}
 		Socket socket = mSocket;
 		mByteSize = INVALID_VALUE;
 		if (socket == null) {
@@ -75,13 +85,16 @@ public class SocketClient {
 
 		try {
 			socket.close();
-			LogLib.d("disconnect ok.");
+			if (DEBUG) {
+				LogLib.d(TAG, "disconnect ok.");
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 		}
 	}
-	
+
 	private void writeBufferSize(Socket socket, int size) throws IOException {
 		DataOutputStream ds = new DataOutputStream(socket.getOutputStream());
 		ds.writeInt(size);
@@ -93,7 +106,7 @@ public class SocketClient {
 		if (socket == null || !socket.isConnected()) {
 			return;
 		}
-		
+
 		boolean error = false;
 		try {
 			if (mByteSize == INVALID_VALUE) {
@@ -105,14 +118,18 @@ public class SocketClient {
 			os.write(data);
 			os.flush();
 		} catch (IOException e) {
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			error = true;
 		} finally {
 			if (error) {
 				try {
 					socket.close();
 				} catch (IOException e) {
-					LogLib.w(e);
+					if (DEBUG) {
+						LogLib.w(TAG, e);
+					}
 				}
 				mSocket = null;
 			}

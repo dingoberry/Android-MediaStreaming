@@ -1,6 +1,7 @@
 package com.k.cam.component;
 
 import com.bbq.w.library.LogLib;
+import com.k.cam.Configuration;
 import com.k.cam.R;
 
 import android.hardware.Camera;
@@ -14,7 +15,11 @@ import android.view.ViewGroup;
 
 @SuppressWarnings("deprecation")
 public class NormalSurfaceFragment extends CameraFragment implements Callback {
-	
+
+	private final static String TAG = "NormalSurfaceFragment";
+
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	private final static int CAMERA_HEIGHT = 600;
 	private final static int CAMERA_WIDTH = 800;
 
@@ -24,7 +29,8 @@ public class NormalSurfaceFragment extends CameraFragment implements Callback {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View content = inflater.inflate(R.layout.normal_surface_fragment, container, false);
+		View content = inflater.inflate(R.layout.normal_surface_fragment,
+				container, false);
 		mSv = (SurfaceView) content.findViewById(R.id.sv);
 		SurfaceHolder holder = mSv.getHolder();
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -35,12 +41,14 @@ public class NormalSurfaceFragment extends CameraFragment implements Callback {
 
 	@Override
 	public void onFrameArrival(byte[] data, Camera camera) {
-		
+
 	}
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		LogLib.d("surfaceCreated");
+		if (DEBUG) {
+			LogLib.d(TAG, "surfaceCreated");
+		}
 		int id = resolveCameraId();
 		if (INVALID_VALUE != id) {
 			openCam(id, CAMERA_WIDTH, CAMERA_HEIGHT);
@@ -50,7 +58,9 @@ public class NormalSurfaceFragment extends CameraFragment implements Callback {
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
-		LogLib.d("surfaceChanged");
+		if (DEBUG) {
+			LogLib.d(TAG, "surfaceChanged");
+		}
 		if (isPreviewing()) {
 			return;
 		}
@@ -59,7 +69,9 @@ public class NormalSurfaceFragment extends CameraFragment implements Callback {
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		LogLib.d("surfaceDestroyed");
+		if (DEBUG) {
+			LogLib.d(TAG, "surfaceDestroyed");
+		}
 		releaseCam();
 	}
 }

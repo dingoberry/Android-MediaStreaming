@@ -17,6 +17,9 @@ import com.k.cam.Configuration;
 public abstract class CameraFragment extends Fragment implements
 		PreviewCallback {
 
+	private final static String TAG = "CameraFragment";
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	protected final static int INVALID_VALUE = -1;
 
 	private Camera mCam;
@@ -25,7 +28,7 @@ public abstract class CameraFragment extends Fragment implements
 
 	private int mWidth, mHeight;
 	private byte[] mBuffer;
-	
+
 	protected abstract void onFrameArrival(byte[] data, Camera camera);
 
 	@Override
@@ -40,7 +43,9 @@ public abstract class CameraFragment extends Fragment implements
 	@Override
 	public void onStart() {
 		super.onStart();
-		LogLib.d("CameraFragment:onStart");
+		if (DEBUG) {
+			LogLib.d(TAG, "CameraFragment:onStart");
+		}
 		Camera cam = mCam;
 		if (mIsPreviewing.get() && cam != null) {
 			cam.startPreview();
@@ -50,7 +55,9 @@ public abstract class CameraFragment extends Fragment implements
 	@Override
 	public void onStop() {
 		super.onStop();
-		LogLib.d("CameraFragment:onStop");
+		if (DEBUG) {
+			LogLib.d(TAG, "CameraFragment:onStop");
+		}
 		Camera cam = mCam;
 		if (mIsPreviewing.get() && cam != null) {
 			cam.stopPreview();
@@ -120,13 +127,17 @@ public abstract class CameraFragment extends Fragment implements
 			default:
 				break;
 			}
-			
+
 			cam.startPreview();
 			mIsPreviewing.compareAndSet(false, true);
 			mCam = cam;
-			LogLib.d("startPreview");
+			if (DEBUG) {
+				LogLib.d(TAG, "startPreview");
+			}
 		} catch (IOException e) {
-			LogLib.w("IOException", e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 		}
 	}
 

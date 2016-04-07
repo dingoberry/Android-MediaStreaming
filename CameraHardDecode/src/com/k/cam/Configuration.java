@@ -5,6 +5,8 @@ import android.hardware.Camera.CameraInfo;
 @SuppressWarnings("deprecation")
 public class Configuration {
 
+	public static final boolean DEBUG = true;
+	
 	public static final int COMPONENT_SURFACE = 0x1;
 	public static final int COMPONENT_GL_SURFACE = 0x2;
 	

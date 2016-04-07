@@ -22,6 +22,9 @@ import com.bbq.w.library.ThreadUtils;
 public class MainActivity extends Activity implements OnClickListener,
 		Runnable, PreviewCallback {
 
+	private final static String TAG = "HostMainActivity";
+	private static final boolean DEBUG = Configuration.DEBUG;
+
 	private final static String IP_RESERVER = "ip_reserver";
 	private final static String PORT_RESERVER = "port_reserver";
 	private final static int INVALID_VALUE = -1;
@@ -92,7 +95,9 @@ public class MainActivity extends Activity implements OnClickListener,
 			camera.stopPreview();
 			camera.release();
 			mCamera = null;
-			LogLib.d("switching, release camera.");
+			if (DEBUG) {
+				LogLib.d(TAG, "switching, release camera.");
+			}
 		}
 
 		ThreadUtils.runAloneThread(new Runnable() {
@@ -118,12 +123,16 @@ public class MainActivity extends Activity implements OnClickListener,
 					SpUtils.saveString(MainActivity.this, IP_RESERVER, ip);
 					SpUtils.saveInt(MainActivity.this, PORT_RESERVER, port);
 
-					LogLib.d("Connect state: " + state);
+					if (DEBUG) {
+						LogLib.d(TAG, "Connect state: " + state);
+					}
 					if (state == true) {
 						mIp.post(MainActivity.this);
 					}
 				} catch (NumberFormatException e) {
-					LogLib.w(e);
+					if (DEBUG) {
+						LogLib.w(TAG, e);
+					}
 				}
 			}
 		});
@@ -133,7 +142,9 @@ public class MainActivity extends Activity implements OnClickListener,
 		Camera camera = mCamera;
 		int cameraId = mCameraIds[mIdIndex];
 		if (camera == null) {
-			LogLib.d("open new camera");
+			if (DEBUG) {
+				LogLib.d(TAG, "open new camera");
+			}
 			camera = Camera.open(cameraId);
 			mCamera = camera;
 		}
@@ -145,7 +156,9 @@ public class MainActivity extends Activity implements OnClickListener,
 			camera.setPreviewDisplay(mHolder);
 			camera.startPreview();
 		} catch (IOException e) {
-			LogLib.w(e);
+			if (DEBUG) {
+				LogLib.w(TAG, e);
+			}
 			mCamera = null;
 		}
 	}
@@ -156,7 +169,9 @@ public class MainActivity extends Activity implements OnClickListener,
 		mConnect.setVisibility(View.GONE);
 		int[] cameraIds = CameraUtils.getCameraIds();
 		if (cameraIds == null || cameraIds.length == 0) {
-			LogLib.d("not suppored camera.");
+			if (DEBUG) {
+				LogLib.d(TAG, "not suppored camera.");
+			}
 			return;
 		}
 		mCameraIds = cameraIds;
