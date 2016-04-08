@@ -14,7 +14,6 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,6 +158,6 @@ public class GLOptimizeFragment extends CameraFragment implements Renderer,
 
 	@Override
 	public void receiveData(byte[] data) {
-		Log.d("ccmm", "receiveData:" + data.length);
+		LogLib.d(TAG, "receiveData:" + data.length);
 	}
 }

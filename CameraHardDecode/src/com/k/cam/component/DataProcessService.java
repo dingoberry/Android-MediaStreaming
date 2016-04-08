@@ -1,13 +1,12 @@
 package com.k.cam.component;
 
-import com.bbq.w.library.LogLib;
-import com.k.cam.Configuration;
-
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Process;
+
+import com.bbq.w.library.LogLib;
+import com.k.cam.Configuration;
 
 public class DataProcessService extends Service {
 

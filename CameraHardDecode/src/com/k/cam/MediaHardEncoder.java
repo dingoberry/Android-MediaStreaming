@@ -20,8 +20,6 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 	private final static String TAG = "MediaHardEncoder";
 	private static final boolean DEBUG = Configuration.DEBUG;
-	
-	private final static String ENCODER_TYPE = "Video/AVC";
 
 	private MediaCodec mCodec;
 	private EncodeDataReceiver mDataReceiver;
@@ -72,7 +70,7 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 		mColorFormat = colorFormat;
 		MediaCodec mediaCodec = MediaCodec.createEncoderByType(encodeType);
-		MediaFormat mediaFormat = MediaFormat.createVideoFormat(ENCODER_TYPE,
+		MediaFormat mediaFormat = MediaFormat.createVideoFormat(encodeType,
 				w, h);
 		mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 125000);
 		mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
@@ -81,6 +79,10 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 		mediaCodec.configure(mediaFormat, null, null,
 				MediaCodec.CONFIGURE_FLAG_ENCODE);
 		return mediaCodec;
+	}
+	
+	public int getColorFormat() {
+		return mColorFormat;
 	}
 
 	public void setEncodeDataReceiver(EncodeDataReceiver receiver) {
@@ -121,7 +123,8 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 	}
 
 	private static long computePresentationTime(int frameIndex) {
-		return 132 + frameIndex * 1000000 / FRAME_RATE;
+//		return 132 + frameIndex * 1000000 / FRAME_RATE;
+		return 0;
 	}
 
 	public synchronized void feedData(byte[] data) {
@@ -161,42 +164,46 @@ public class MediaHardEncoder implements MediaHardCore, Runnable {
 
 	@Override
 	public void run() {
-		BufferInfo bufferInfo = new BufferInfo();
-		MediaCodec mediaCodec = mCodec;
-		if (mediaCodec == null) {
-			return;
-		}
-
-		int index;
-		ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
-
-		byte[] data;
-		while (mIsEncoding.get()) {
-			if (DEBUG) {
-				LogLib.d(TAG, "run:" + mIsEncoding.get());
+		try {
+			BufferInfo bufferInfo = new BufferInfo();
+			MediaCodec mediaCodec = mCodec;
+			if (mediaCodec == null) {
+				return;
 			}
-			index = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
-			if (DEBUG) {
-				LogLib.d(TAG, "output buffer:" + index);
-			}
-			if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
-				outputBuffers = mediaCodec.getOutputBuffers();
-			} else if (index >= 0) {
-				EncodeDataReceiver receiver = mDataReceiver;
-				if (receiver != null) {
-					ByteBuffer buffer = outputBuffers[index];
-					buffer.position(bufferInfo.offset);
-					buffer.limit(bufferInfo.offset + bufferInfo.size);
 
-					data = new byte[bufferInfo.size];
-					buffer.get(data);
-					receiver.receiveData(data);
+			int index;
+			ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
+
+			byte[] data;
+			while (mIsEncoding.get()) {
+				if (DEBUG) {
+					LogLib.d(TAG, "run:" + mIsEncoding.get());
 				}
-				mediaCodec.releaseOutputBuffer(index, false);
-				synchronized (this) {
-					mediaCodec.flush();
+				index = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
+				if (DEBUG) {
+					LogLib.d(TAG, "output buffer:" + index);
+				}
+				if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+					outputBuffers = mediaCodec.getOutputBuffers();
+				} else if (index >= 0) {
+					EncodeDataReceiver receiver = mDataReceiver;
+					if (receiver != null) {
+						ByteBuffer buffer = outputBuffers[index];
+						buffer.position(bufferInfo.offset);
+						buffer.limit(bufferInfo.offset + bufferInfo.size);
+
+						data = new byte[bufferInfo.size];
+						buffer.get(data);
+						receiver.receiveData(data);
+					}
+					mediaCodec.releaseOutputBuffer(index, false);
+					synchronized (this) {
+						mediaCodec.flush();
+					}
 				}
 			}
+		} catch (IllegalStateException e) {
+			LogLib.w(TAG, e);
 		}
 	}
 
